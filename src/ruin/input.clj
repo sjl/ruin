@@ -32,9 +32,21 @@
     (push-ui (->UI :start))))
 
 
+(defn scroll-map [dir]
+  (let [offset (case dir
+                 :w [-1 0]
+                 :e [1 0]
+                 :s [0 1]
+                 :n [0 -1])]
+    (dosync (alter game update-in [:viewport-origin] #(map + offset %)))))
+
 (defmethod process-input :play [ui input]
   (case input
     \Q (quit-game)
+    \h (scroll-map :w)
+    \j (scroll-map :s)
+    \k (scroll-map :n)
+    \l (scroll-map :e)
     :enter (dosync
              (pop-ui)
              (push-ui (->UI :win)))
