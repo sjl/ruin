@@ -40,15 +40,18 @@
 
 (defn draw-entities []
   (let [[ox oy] (:viewport-origin @game)
-        screen (:screen @game)]
-  (doseq [entity (vals @(:entities @game))]
-    (let [{:keys [location glyph]} @entity
-          [x y] location
-          vx (- x ox)
-          vy (- y oy)]
-      (when (and (<= 0 vx)
-                 (<= 0 vy)))
-      (s/put-string screen vx vy glyph)))))
+        screen (:screen @game)
+        [cols rows] (s/get-size screen)
+        map-height rows
+        map-width (- cols (inc SIDEBAR-WIDTH))]
+    (doseq [entity (vals @(:entities @game))]
+      (let [{:keys [location glyph]} @entity
+            [x y] location
+            vx (- x ox)
+            vy (- y oy)]
+        (when (and (<= 0 vy (dec map-height))
+                   (<= 0 vx (dec map-width)))
+          (s/put-string screen vx vy glyph))))))
 
 (defn draw-map []
   (let [screen (:screen @game)
@@ -93,9 +96,10 @@
         y (inc STATUS-HEIGHT)]
     (s/put-sheet screen x y
                  ["MENU"
-                  "hjkl: move view"
-                  "Q:    quit game"]))
-  )
+                  "hjklyubn: move view"
+                  "HJKLYUBN: move view faster"
+                  "Q:        quit game"])))
+
 (defn draw-sidebar []
   (draw-status)
   (draw-main-menu))
