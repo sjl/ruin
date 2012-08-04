@@ -47,20 +47,31 @@
                  (repeat map-height (repeat map-width \.)))))
 
 (defn draw-status []
-  (let [screen (:screen @game)
+  (let [game @game
+        screen (:screen game)
         [cols rows] (s/get-size screen)
-        x (- cols SIDEBAR-WIDTH)]
+        x (- cols SIDEBAR-WIDTH)
+        total-building-aspect (fn [aspect kind]
+                                (reduce + (map #(aspect @%)
+                                               (filter #(= kind (:type @%))
+                                                       (vals @(:buildings game))))))
+        population (count (filter #(= :person (:type @%))
+                                  (vals @(:entities game))))
+        housing (total-building-aspect :capacity :house)
+        food (total-building-aspect :contents :silo)
+        food-storage (total-building-aspect :capacity :silo)
+        resources @(:resources game)
+        [score-peak score-current] @(:score game)]
     (s/put-sheet screen x 0
                  ["SCORE"
-                  "peak   current   total"
-                  "4000 - 23      = 3977"
+                  (str score-peak " - " score-current " = " (- score-peak score-current))
                   ""
                   "STATUS"
                   "Time:         Year 45, Month 12"
-                  "Population:   50 / 100"
-                  "Food:         245 / 400"
+                  (str "Population:   " population " / " housing)
+                  (str "Food:         " food " / " food-storage)
                   "Satisfaction: 80%"
-                  "Resources:    1033"])))
+                  (str "Resources:    " resources)])))
 
 (defn draw-main-menu []
   (let [screen (:screen @game)
