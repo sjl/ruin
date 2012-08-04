@@ -33,12 +33,21 @@
     (recur)))
 
 
+(defn handle-input [input]
+  (when (= input \q)
+    (dosync (alter game dissoc :state))
+    (s/stop (:screen @game))))
+
+(defn input-loop []
+  (handle-input (s/get-key-blocking (:screen @game)))
+  (when (:state @game)
+    (recur)))
+
+
 (defn run-game []
   (let [screen (:screen @game)]
     (future (draw-loop))
-    (s/get-key-blocking screen)
-    (dosync (alter game dissoc :state))
-    (s/stop screen)))
+    (future (input-loop))))
 
 
 (defn main []
