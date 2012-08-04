@@ -8,10 +8,10 @@
 (defn get-entity-id []
   (swap! eid inc))
 
-(defn make-person []
-  (agent {:nutrition 100
+(defn make-person [location]
+  (agent {:nutrition (rand-int 5)
           :id (get-entity-id)
-          :location [(rand-int 40) (rand-int 40)]
+          :location location
           :type :person
           :glyph "@"
           :happiness 50}))
@@ -23,14 +23,34 @@
         new-location (map + offset (:location person))]
     (assoc person :location new-location)))
 
+(defn try-walking [person]
+  (if (< (rand) 0.5)
+    (walk-random person)
+    person))
+
+(defn try-eating [person tick]
+  (if (zero? (mod tick 2))
+    (update-in person [:nutrition] dec)
+    person))
+
+(defn check-starved [person]
+  (if-not (pos? (:nutrition person))
+    (do
+      (alter (:entities @game) dissoc (:id person))
+      (assoc person :dead true))
+    person))
+
+
 (defn tick-person [person tick]
+  (Thread/sleep 1000)
   (dosync
-    (when (:state @game)
+    (when (and (:state @game)
+               (not (:dead person)))
       (send-off *agent* #'tick-person (inc tick)))
-    (Thread/sleep 1000)
-    (if (< (rand) 0.5)
-      (walk-random person)
-      person)))
+    (-> person
+      try-walking
+      (try-eating tick)
+      check-starved)))
 
 
 (defn start-person [p]

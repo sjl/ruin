@@ -70,7 +70,8 @@
 
 (defn create-initial-population []
   (let [population (into {}
-                         (gen-things 10 make-person))]
+                         (gen-things 10 #(make-person [(rand-int 50)
+                                                       (rand-int 40)])))]
     (dorun (map start-person (vals population)))
     population))
 
