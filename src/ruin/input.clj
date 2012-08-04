@@ -9,12 +9,14 @@
   (fn [ui input]
     (:kind ui)))
 
+(defn quit-game []
+  (do
+    (dosync (alter game dissoc :state))
+    (s/stop (:screen @game))))
 
 (defmethod process-input :start [ui input]
   (cond
-    (#{:escape \q} input) (do
-                            (dosync (alter game dissoc :state))
-                            (s/stop (:screen @game)))
+    (#{:escape \q} input) (quit-game)
     :else (dosync
             (pop-ui)
             (push-ui (->UI :play)))))
@@ -32,6 +34,7 @@
 
 (defmethod process-input :play [ui input]
   (case input
+    \Q (quit-game)
     :enter (dosync
              (pop-ui)
              (push-ui (->UI :win)))

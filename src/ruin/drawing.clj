@@ -3,6 +3,7 @@
   (:require [lanterna.screen :as s]))
 
 (def SIDEBAR-WIDTH 35)
+(def STATUS-HEIGHT 10)
 
 (defmulti draw-ui
   "Draw the UI to the console.  Does not clear or refresh."
@@ -45,13 +46,12 @@
     (s/put-sheet screen 0 0
                  (repeat map-height (repeat map-width \.)))))
 
-(defn draw-sidebar []
+(defn draw-status []
   (let [screen (:screen @game)
         [cols rows] (s/get-size screen)
         x (- cols SIDEBAR-WIDTH)]
     (s/put-sheet screen x 0
-                 [
-                  "SCORE"
+                 ["SCORE"
                   "peak   current   total"
                   "4000 - 23      = 3977"
                   ""
@@ -60,9 +60,21 @@
                   "Population:   50 / 100"
                   "Food:         245 / 400"
                   "Satisfaction: 80%"
-                  "Resources:    1033"
-                  ""
-                  ])))
+                  "Resources:    1033"])))
+
+(defn draw-main-menu []
+  (let [screen (:screen @game)
+        [cols rows] (s/get-size screen)
+        x (- cols SIDEBAR-WIDTH)
+        y (inc STATUS-HEIGHT)]
+    (s/put-sheet screen x y
+                 ["MENU"
+                  "hjkl: move view"
+                  "Q:    quit game"]))
+  )
+(defn draw-sidebar []
+  (draw-status)
+  (draw-main-menu))
 
 (defmethod draw-ui :play [ui]
   (io!
