@@ -1,11 +1,10 @@
 (ns ruin.core
-  (:use [ruin.ui :only [->UI]]
+  (:use [ruin.state :only [game]]
+        [ruin.ui :only [->UI]]
         [ruin.drawing :only [draw-ui]]
         [ruin.input :only [process-input]])
   (:require [lanterna.screen :as s]))
 
-
-(defonce game (ref nil))
 
 (defn create-fresh-game
   "Refresh the game var with a new game.
@@ -29,10 +28,9 @@
 (defn draw-uis
   "Draw each UI in the game in turn."
   []
-  (let [game @game]
-    (s/clear (:screen game))
-    (dorun (map #(draw-ui % game) (:uis game)))
-    (s/redraw (:screen game))))
+  (s/clear (:screen @game))
+  (dorun (map draw-ui (:uis @game)))
+  (s/redraw (:screen @game)))
 
 (defn draw-loop
   "Continually draw all the game's UIs, until the game stops running."
@@ -47,8 +45,7 @@
   "Continually process input, until the game stops running."
   []
   (process-input (last (:uis @game))
-                 game
-                 (s/get-key-blocking (:screen @game)))
+                 (io! (s/get-key-blocking (:screen @game))))
   (when (:state @game)
     (recur)))
 

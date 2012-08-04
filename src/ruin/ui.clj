@@ -1,4 +1,5 @@
-(ns ruin.ui)
+(ns ruin.ui
+  (:use [ruin.state :only [game]]))
 
 
 (defrecord UI [kind])
@@ -10,7 +11,7 @@
   you want to synchronize it with another action, like popping a UI.
 
   "
-  [game ui]
+  [ui]
   (dosync
     (alter game update-in [:uis] conj ui)))
 
@@ -21,7 +22,7 @@
   you want to synchronize it with another action, like pushing another UI.
 
   "
-  [game]
+  []
   (dosync
     (let [result (last (:uis @game))]
       (alter game update-in [:uis] pop)
