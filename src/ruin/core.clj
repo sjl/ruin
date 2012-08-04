@@ -1,5 +1,7 @@
 (ns ruin.core
-  (:use [ruin.ui :only [draw-ui ->UI]])
+  (:use [ruin.ui :only [->UI]]
+        [ruin.drawing :only [draw-ui]]
+        [ruin.input :only [process-input]])
   (:require [lanterna.screen :as s]))
 
 
@@ -18,11 +20,10 @@
       (s/start scr))))
 
 
-(defn push-ui [])
-(defn pop-ui [])
 
 (defn draw-uis []
   (let [game @game]
+    (s/clear (:screen game))
     (dorun (map #(draw-ui % game) (:uis game)))
     (s/redraw (:screen game))))
 
@@ -33,13 +34,10 @@
     (recur)))
 
 
-(defn handle-input [input]
-  (when (= input \q)
-    (dosync (alter game dissoc :state))
-    (s/stop (:screen @game))))
-
 (defn input-loop []
-  (handle-input (s/get-key-blocking (:screen @game)))
+  (process-input (last (:uis @game))
+                 game
+                 (s/get-key-blocking (:screen @game)))
   (when (:state @game)
     (recur)))
 
