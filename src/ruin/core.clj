@@ -7,12 +7,14 @@
 
 (defn create-fresh-game []
   (dosync
-    (ref-set game {})
-    (let [scr (s/get-screen)]
-      (s/start scr)
-      (alter game merge {:screen scr
-                         :entities {}
-                         :uis [(->UI :start)]}))))
+    (let [scr (s/get-screen :swing {:cols 120
+                                    :rows 45
+                                    :font "Menlo"
+                                    :font-size 16})]
+      (ref-set game {:screen scr
+                     :entities {}
+                     :uis [(->UI :start)]})
+      (s/start scr))))
 
 (defn draw-uis [uis game]
   (dorun (map #(draw-ui % game) uis))
