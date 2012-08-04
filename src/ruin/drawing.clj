@@ -2,7 +2,7 @@
   (:use [ruin.state :only [game]])
   (:require [lanterna.screen :as s]))
 
-(def SIDEBAR-WIDTH 40)
+(def SIDEBAR-WIDTH 35)
 
 (defmulti draw-ui
   "Draw the UI to the console.  Does not clear or refresh."
@@ -45,9 +45,29 @@
     (s/put-sheet screen 0 0
                  (repeat map-height (repeat map-width \.)))))
 
+(defn draw-sidebar []
+  (let [screen (:screen @game)
+        [cols rows] (s/get-size screen)
+        x (- cols SIDEBAR-WIDTH)]
+    (s/put-sheet screen x 0
+                 [
+                  "SCORE"
+                  "peak   current   total"
+                  "4000 - 23      = 3977"
+                  ""
+                  "STATUS"
+                  "Time:         Year 45, Month 12"
+                  "Population:   50 / 100"
+                  "Food:         245 / 400"
+                  "Satisfaction: 80%"
+                  "Resources:    1033"
+                  ""
+                  ])))
+
 (defmethod draw-ui :play [ui]
   (io!
     (draw-map)
+    (draw-sidebar)
     (s/put-sheet (:screen @game) 0 0
                  ["You are playing."
                   ""
