@@ -4,8 +4,10 @@
 
 
 (defmulti process-input
+  "Handle input from the console."
   (fn [ui game input]
     (:kind ui)))
+
 
 (defmethod process-input :start [ui game input]
   (cond
@@ -16,15 +18,6 @@
             (pop-ui game)
             (push-ui game (->UI :play)))))
 
-(defmethod process-input :play [ui game input]
-  (case input
-    :enter (dosync
-             (pop-ui game)
-             (push-ui game (->UI :win)))
-    (dosync
-      (pop-ui game)
-      (push-ui game (->UI :lose)))))
-
 (defmethod process-input :win [ui game input]
   (dosync
     (pop-ui game)
@@ -34,3 +27,14 @@
   (dosync
     (pop-ui game)
     (push-ui game (->UI :start))))
+
+
+(defmethod process-input :play [ui game input]
+  (case input
+    :enter (dosync
+             (pop-ui game)
+             (push-ui game (->UI :win)))
+    (dosync
+      (pop-ui game)
+      (push-ui game (->UI :lose)))))
+
