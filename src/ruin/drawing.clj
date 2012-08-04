@@ -79,9 +79,10 @@
         [cols rows] (s/get-size screen)
         map-height rows
         map-width (- cols (inc SIDEBAR-WIDTH))
+        row (apply str (repeat map-width \.))
         ]
     (s/put-sheet screen 0 0
-                 (repeat map-height (repeat map-width \.)))))
+                 (repeat map-height row))))
 
 (defn clear-sidebar []
   (let [game @game

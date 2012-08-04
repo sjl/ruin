@@ -1,12 +1,40 @@
 (ns ruin.core
   (:use [ruin.state :only [game]]
-        [ruin.entities :only [make-person]]
+        [ruin.entities :only [make-person start-person]]
         [ruin.buildings :only [make-house make-silo make-farm]]
         [ruin.ui :only [->UI]]
         [ruin.drawing :only [draw-ui]]
         [ruin.input :only [process-input]])
   (:require [lanterna.screen :as s]))
 
+
+(defn entities-at [coord]
+  (filter #(= coord (:location @%))
+          (vals @(:entities @game))))
+
+(defn buildings-collide? [a b]
+  (let [[ax ay] (:location a)
+        [bx by] (:location b)
+        [aw ah] (:size a)
+        [bw bh] (:size b)
+        ax' (+ ax aw)
+        ay' (+ ay ah)
+        bx' (+ bx bw)
+        by' (+ by bh)]
+    (not (or (< ay' by)
+             (> ay by')
+             (< ax' bx)
+             (> ax bx')))))
+
+
+(defn add-building [f]
+  (let [existing (vals @(:buildings @game))
+        building (f)]
+    (if (some #(buildings-collide? @building @%)
+              existing)
+      (recur f)
+      (dosync
+        (alter (:buildings @game) assoc (:id @building) building)))))
 
 (defn calc-score []
   (letfn [(count-things [source kind]
@@ -41,14 +69,15 @@
 
 
 (defn create-initial-population []
-  (into {}
-        (gen-things 10 make-person)))
+  (let [population (into {}
+                         (gen-things 10 make-person))]
+    (dorun (map start-person (vals population)))
+    population))
 
 (defn create-initial-buildings []
-  (into {}
-        (concat (gen-things 4 make-house)
-                (gen-things 1 make-farm)
-                (gen-things 2 #(make-silo 25)))))
+  (dorun (repeatedly 4 #(add-building make-house)))
+  (dorun (repeatedly 2 #(add-building (partial make-silo 25))))
+  (dorun (repeatedly 1 #(add-building make-farm))))
 
 
 (defn create-fresh-game
@@ -65,12 +94,13 @@
                                     :font-size 16})]
       (ref-set game {:screen scr
                      :entities (ref (create-initial-population))
-                     :buildings (ref (create-initial-buildings))
+                     :buildings (ref {})
                      :resources (ref 20)
                      :viewport-origin [0 0]
                      :score (ref [0 0])
                      :state :running
                      :uis [(->UI :start)]})
+      (create-initial-buildings)
       (s/start scr))))
 
 
@@ -85,7 +115,7 @@
   "Continually draw all the game's UIs, until the game stops running."
   []
   (draw-uis)
-  (Thread/sleep 300)
+  (Thread/sleep 100)
   (when (:state @game)
     (recur)))
 
