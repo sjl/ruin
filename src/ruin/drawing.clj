@@ -1,5 +1,6 @@
 (ns ruin.drawing
-  (:use [ruin.state :only [game]])
+  (:use [ruin.state :only [game]]
+        [ruin.buildings :only [get-building-sheet]])
   (:require [lanterna.screen :as s]))
 
 (def SIDEBAR-WIDTH 35)
@@ -60,7 +61,7 @@
         map-height rows
         map-width (- cols (inc SIDEBAR-WIDTH))]
     (doseq [building (vals @(:buildings @game))]
-      (let [{:keys [location size get-sheet]} @building
+      (let [{:keys [location size]} @building
             [x y] location
             [width height] size
             vx (- x ox)
@@ -71,7 +72,7 @@
                    (<= 0 vx')
                    (< vy map-height)
                    (< vx map-width))
-          (s/put-sheet screen vx vy (get-sheet @building)))))))
+          (s/put-sheet screen vx vy (get-building-sheet @building)))))))
 
 (defn draw-map []
   (let [screen (:screen @game)

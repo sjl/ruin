@@ -1,4 +1,5 @@
-(ns ruin.buildings)
+(ns ruin.buildings
+  (:use [ruin.util :only [colorize]]))
 
 
 (defonce bid (atom 1))
@@ -7,15 +8,34 @@
   (swap! bid inc))
 
 
+(defmulti get-building-sheet :type)
+
+(defmethod get-building-sheet :house [building]
+  (colorize :red ["/`\\"
+                  "|_|"]))
+
+(defmethod get-building-sheet :farm [building]
+  (colorize :yellow ["~~~~~"
+                     "~~~~~"
+                     "~~~~~"]))
+
+(defmethod get-building-sheet :silo [building]
+  (let [middle (if (zero? (:contents building))
+                 \space
+                 \≈)]
+    ["+-+"
+     [\|
+      [middle {:fg :yellow}]
+      \|]
+     "+-+"]))
+
+
 (defn make-house []
   (agent {:id (get-building-id)
           :capacity 4
           :type :house
           :location [(rand-int 50) (rand-int 30)]
-          :size [3 2]
-          :get-sheet (fn [house]
-                       ["/`\\"
-                        "|_|"])}))
+          :size [3 2]}))
 
 (defn make-silo
   ([] (make-silo 0))
@@ -25,15 +45,13 @@
            :capacity 50
            :location [(rand-int 50) (rand-int 30)]
            :size [3 3]
-           :get-sheet (fn [silo]
-                        ["+-+"
-                         [\| [(if (zero? (:contents silo))
-                                \space
-                                \≈)
-                              {:fg :yellow}] \|]
-                         "+-+"])
-           :color :yellow
            :type :silo})))
+
+(defn make-farm []
+  (agent {:id (get-building-id)
+          :location [(rand-int 50) (rand-int 30)]
+          :size [5 3]
+          :type :farm}))
 
 
 (defn start-building [b]

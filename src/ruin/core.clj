@@ -1,7 +1,7 @@
 (ns ruin.core
   (:use [ruin.state :only [game]]
         [ruin.entities :only [make-person]]
-        [ruin.buildings :only [make-house make-silo]]
+        [ruin.buildings :only [make-house make-silo make-farm]]
         [ruin.ui :only [->UI]]
         [ruin.drawing :only [draw-ui]]
         [ruin.input :only [process-input]])
@@ -47,6 +47,7 @@
 (defn create-initial-buildings []
   (into {}
         (concat (gen-things 4 make-house)
+                (gen-things 1 make-farm)
                 (gen-things 2 #(make-silo 25)))))
 
 
@@ -59,7 +60,7 @@
   []
   (dosync
     (let [scr (s/get-screen :swing {:cols 120
-                                    :rows 45
+                                    :rows 35
                                     :font "Menlo"
                                     :font-size 16})]
       (ref-set game {:screen scr

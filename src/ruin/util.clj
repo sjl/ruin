@@ -1,5 +1,11 @@
 (ns ruin.util)
 
+
+(defn colorize [fg sheet]
+  (map #(for [ch %]
+          [ch {:fg fg}])
+       sheet))
+
 (defn dir-to-offset [dir]
   (case dir
     :w [-1 0]
