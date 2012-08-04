@@ -38,11 +38,24 @@
                   "press any key to continue..."])))
 
 
+(defn draw-entities []
+  (let [[ox oy] (:viewport-origin @game)
+        screen (:screen @game)]
+  (doseq [entity (vals @(:entities @game))]
+    (let [{:keys [location glyph]} @entity
+          [x y] location
+          vx (- x ox)
+          vy (- y oy)]
+      (when (and (<= 0 vx)
+                 (<= 0 vy)))
+      (s/put-string screen vx vy glyph)))))
+
 (defn draw-map []
   (let [screen (:screen @game)
         [cols rows] (s/get-size screen)
         map-height rows
-        map-width (- cols (inc SIDEBAR-WIDTH))]
+        map-width (- cols (inc SIDEBAR-WIDTH))
+        ]
     (s/put-sheet screen 0 0
                  (repeat map-height (repeat map-width \.)))))
 
@@ -90,9 +103,6 @@
 (defmethod draw-ui :play [ui]
   (io!
     (draw-map)
-    (draw-sidebar)
-    (s/put-sheet (:screen @game) 0 0
-                 ["You are playing."
-                  ""
-                  "press enter to win, anything else to lose"])))
+    (draw-entities)
+    (draw-sidebar)))
 

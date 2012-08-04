@@ -9,7 +9,9 @@
 (defn make-person []
   (agent {:nutrition 100
           :id (get-entity-id)
+          :location [(rand-int 40) (rand-int 40)]
           :type :person
+          :glyph "@"
           :happiness 50}))
 
 

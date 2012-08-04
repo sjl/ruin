@@ -66,6 +66,7 @@
                      :entities (ref (create-initial-population))
                      :buildings (ref (create-initial-buildings))
                      :resources (ref 20)
+                     :viewport-origin [0 0]
                      :score (ref [0 0])
                      :state :running
                      :uis [(->UI :start)]})
